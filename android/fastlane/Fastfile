@@ -1,0 +1,47 @@
+default_platform(:android)
+
+platform :android do
+  desc "Runs all the tests"
+  lane :test do
+    gradle(task: "test")
+  end
+
+  desc "Submit a new Beta Build to Crashlytics Beta"
+  lane :beta do
+    gradle(task: "clean assembleRelease")
+    crashlytics
+
+    # sh "your_script.sh"
+    # You can also use other beta testing services here
+  end
+
+ desc "Run Flutter Doctor"
+  lane :flutter_doctor do
+    sh "./flutter/bin/flutter doctor"
+  end
+
+
+  desc "Build the APK"
+    lane :build do
+      sh "gradle -v" # Print the Gradle version
+      sh "java -version" # Print the Java version
+      gradle(task: "assembleRelease", print_command: true)
+    end
+
+    desc "Deploy to Firebase App Distribution"
+    lane :deploy do
+      build
+      release = firebase_app_distribution(
+        app: "1:1025079123340:android:4f0a4e23c3139c4a1acaa9",
+        testers: "qasimvora5@gmail.com",
+        firebase_cli_token: ENV["FIREBASE_TOKEN"],
+        firebase_cli_path: "/usr/local/bin/firebase",
+        android_artifact_type: "APK",
+        apk_path: "../build/app/outputs/flutter-apk/app-release.apk",
+        release_notes: "Automatic build and upload with Fastlane and Firebase App Distribution",
+        verbose: true
+      )
+    end
+
+
+end

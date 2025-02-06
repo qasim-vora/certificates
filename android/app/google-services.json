@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1025079123340",
+    "project_id": "social-capp",
+    "storage_bucket": "social-capp.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1025079123340:android:4f0a4e23c3139c4a1acaa9",
+        "android_client_info": {
+          "package_name": "com.example.social.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCdPlOb2sv8nX_bArKeHoT4VtbNgMPtZuo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

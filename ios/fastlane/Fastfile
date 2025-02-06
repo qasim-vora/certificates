@@ -1,0 +1,22 @@
+default_platform(:ios)
+
+platform :ios do
+  desc "Push a new beta build to TestFlight"
+
+lane :beta do
+  app_identifier = ENV["APP_IDENTIFIER"] || "com.example.social.app"
+  app_name = ENV["APP_NAME"] || "CI Media"
+  team_id = ENV["APP_STORE_TEAM_ID"] || "LNR2265795"
+
+  match(
+    type: "appstore",
+    readonly: true,
+    team_id: ENV["APP_STORE_TEAM_ID"],
+    keychain_password: ENV["MATCH_PASSWORD"]
+  )
+
+  # Build the app using the existing certificate
+  build_app(workspace: "Runner.xcworkspace", scheme: "Runner")
+
+  pilot(api_key_path: "fastlane/store.json", skip_waiting_for_build_processing: true)
+end
