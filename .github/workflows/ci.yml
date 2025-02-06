@@ -2,8 +2,12 @@ name: Fastlane Deploy to Firebase
 
 on:
   push:
-    branches: [ main ]
+    branches: [ MAIN ]
   workflow_dispatch:
+  # Change this to the branch you want to trigger the deployment on
+  # Uncomment the lines below to also trigger on release events
+  # release:
+  #   types: [created]
 
 jobs:
   build:
@@ -13,32 +17,35 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
+
       - name: Set up Flutter
         run: |
           git clone https://github.com/flutter/flutter.git -b stable
           echo "$GITHUB_WORKSPACE/flutter/bin" >> $GITHUB_PATH
-          echo 'export PATH="$GITHUB_WORKSPACE/flutter/bin:$PATH"' >> ~/.bashrc
-          source ~/.bashrc
-          flutter doctor
-
-      - name: Create local.properties
-        run: |
+          flutter/bin/flutter doctor # Use the full path to flutter
+          
+          
+          
+           # Create local.properties dynamically
           echo "sdk.dir=${HOME}/Android/Sdk" > android/local.properties
           echo "flutter.sdk=${GITHUB_WORKSPACE}/flutter" >> android/local.properties
           echo "flutter.buildMode=debug" >> android/local.properties
           echo "flutter.versionName=1.0.0" >> android/local.properties
           echo "flutter.versionCode=1" >> android/local.properties
 
+
       - name: Install Dependencies
         run: |
-          flutter clean   
-          flutter pub upgrade  
-          flutter pub run build_runner build --delete-conflicting-outputs
+            flutter/bin/flutter clean   
+            flutter/bin/flutter pub upgrade  
+            flutter/bin/flutter pub run build_runner build --delete-conflicting-outputs
+        working-directory: /home/runner/work/Social-app/Social-app
 
       - name: Set up JDK
         uses: actions/setup-java@v1
         with:
-          java-version: '17'
+          java-version: '17' # Specify the Java version needed for your Android project
+
 
       - name: Install dependencies
         run: |
@@ -47,16 +54,18 @@ jobs:
           gem install bundler --user-install
           gem install fastlane -NV --user-install
           gem install fastlane-plugin-firebase_app_distribution --user-install
-          sudo npm install -g firebase-tools
           echo 'export PATH="$HOME/.gem/ruby/3.2.0/bin:$PATH"' >> ~/.bashrc
-          source ~/.bashrc
+          sudo npm install -g firebase-tools
+          
+            
 
       - name: Print Environment Variables
         run: printenv
-
       - name: Run Fastlane deploy
+
+
         env:
-          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }} # Add your Firebase token as a GitHub secret
         run: |
-          cd android
+          cd android # Navigate to the android directory if needed
           fastlane android deploy
