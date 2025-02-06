@@ -2,7 +2,7 @@ name: Fastlane Deploy to Firebase
 
 on:
   push:
-    branches: [ MAIN ]
+    branches: [ main ]
   workflow_dispatch:
   # Change this to the branch you want to trigger the deployment on
   # Uncomment the lines below to also trigger on release events
