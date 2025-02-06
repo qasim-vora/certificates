@@ -25,7 +25,7 @@ platform :android do
     lane :build do
       sh "gradle -v" # Print the Gradle version
       sh "java -version" # Print the Java version
-      gradle(task: "assembleRelease", print_command: true)
+      gradle(task: "assembleRelease", print_command: true, verbose: true)
     end
 
     desc "Deploy to Firebase App Distribution"
