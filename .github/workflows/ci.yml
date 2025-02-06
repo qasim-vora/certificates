@@ -13,11 +13,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: Set up Flutter
-        run: |
-          git clone https://github.com/flutter/flutter.git -b stable
-          echo "$GITHUB_WORKSPACE/flutter/bin" >> $GITHUB_PATH
-          flutter/bin/flutter doctor
 
       - name: Create local.properties
         run: |
@@ -27,11 +22,21 @@ jobs:
           echo "flutter.versionName=1.0.0" >> android/local.properties
           echo "flutter.versionCode=1" >> android/local.properties
 
-      - name: Install Dependencies
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.27.1"
+          channel: 'stable'
+          cache: true
+
+      - name: Get Packages
         run: |
-          flutter/bin/flutter clean   
-          flutter/bin/flutter pub upgrade  
-          flutter/bin/flutter pub run build_runner build --delete-conflicting-outputs
+          flutter clean
+          flutter pub get
+          flutter pub run build_runner build --delete-conflicting-outputs
+
+     
+
 
       - name: Set up JDK
         uses: actions/setup-java@v1
