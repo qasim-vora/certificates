@@ -25,7 +25,7 @@ jobs:
           echo "$GITHUB_WORKSPACE/flutter/bin" >> $GITHUB_PATH
           echo 'export PATH="$GITHUB_WORKSPACE/flutter/bin:$PATH"' >> ~/.bashrc
           source ~/.bashrc
-          flutter doctor
+          flutter/bin/flutter doctor
           
           
           
