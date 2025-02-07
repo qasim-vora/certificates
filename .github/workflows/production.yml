@@ -21,6 +21,12 @@ jobs:
           ruby-version: 3.0
           bundler-cache: true
 
+      - name: Install Bundler
+        run: |
+          gem install bundler
+          if [ -f "Gemfile" ]; then bundle install --jobs 4 --retry 3; else echo "No Gemfile found, skipping bundle install."; fi
+
+
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
@@ -31,10 +37,7 @@ jobs:
       - name: Get Packages
         run: flutter pub get
 
-      - name: Install Bundler
-        run: |
-              gem install bundler
-              bundle install --jobs 4 --retry 3
+
 
 
       - name: Install CocoaPods
@@ -58,7 +61,7 @@ jobs:
           MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
         run: |
           cd ios
-          bundle exec fastlane ios beta
+          if [ -f "Gemfile" ]; then bundle exec fastlane ios beta; else fastlane ios beta; fi
 
   deploy_android:
     name: Build & Upload Android to Firebase
