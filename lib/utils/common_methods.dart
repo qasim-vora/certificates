@@ -16,7 +16,6 @@ import 'package:social_app/constants/app_constants.dart';
 import 'package:social_app/constants/app_fonts.dart';
 import 'package:social_app/router/navigation_methods.dart';
 import 'package:video_compress/video_compress.dart';
-import 'package:video_thumbnail/video_thumbnail.dart';
 
 import '../gen/assets.gen.dart';
 import '../theme/app_color.dart';
