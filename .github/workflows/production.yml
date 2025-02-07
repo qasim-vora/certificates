@@ -17,19 +17,17 @@ jobs:
       - name: Set up Ruby & Bundler
         uses: ruby/setup-ruby@v1
         with:
-            ruby-version: 3.2
-            bundler-cache: true
+          ruby-version: 3.0
+          bundler-cache: true
 
-      - name: Install Bundler & Dependencies
+      - name: Install Bundler
         run: |
-            if [ -f "ios/Gemfile" ]; then
-              cd ios
-              gem install bundler
-              rm -f Gemfile.lock  # Remove any corrupt Gemfile.lock
-              bundle install --jobs 4 --retry 3
-            else
-              echo "No Gemfile found in ios directory, skipping bundle install."
-            fi
+          gem install bundler
+
+      - name: Install Dependencies via Bundler
+        run: |
+          cd ios
+          bundle install
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
