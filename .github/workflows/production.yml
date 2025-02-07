@@ -32,38 +32,53 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: "3.27.4"
+          flutter-version: "3.27.1"
           channel: 'stable'
           cache: true
 
       - name: Get Packages
-        run: flutter pub get
-
-
-
+        run: |
+          flutter clean
+          flutter pub get
+          flutter pub run build_runner build --delete-conflicting-outputs
 
       - name: Install CocoaPods
         run: |
           sudo gem install cocoapods
           cd ios
           rm Podfile.lock
-          pod install --repo-update
+          pod install 
 
-      - name: Install Fastlane
-        run: brew install fastlane
+      - name: Print environment variables
+        run: |
+          echo "APPLE_KEY_CONTENT=${{ secrets.APPLE_KEY_CONTENT }}"
+          echo "APPLE_KEY_ID=${{ secrets.APPLE_KEY_ID }}"
+          echo "TEMP_KEYCHAIN_PASSWORD=${{ secrets.TEMP_KEYCHAIN_PASSWORD }}"
+          echo "APPLE_ISSUER_ID=${{ secrets.APPLE_ISSUER_ID }}"
+          echo "APP_IDENTIFIER=${{ secrets.APP_IDENTIFIER }}"
+          echo "TEMP_KEYCHAIN_USER=${{ secrets.TEMP_KEYCHAIN_USER }}"
+          echo "FASTLANE_USER=${{ secrets.FASTLANE_APPLE_ID }}"
+          echo "MATCH_PASSWORD=${{ secrets.MATCH_PASSWORD }}"
+          echo "FASTLANE_VERBOSE=${{ secrets.FASTLANE_VERBOSE }}"
+
 
       - name: Build & Upload to TestFlight
         env:
-          APP_STORE_KEY_ID: ${{ secrets.APP_STORE_KEY_ID }}
-          APP_STORE_ISSUER_ID: ${{ secrets.APP_STORE_ISSUER_ID }}
-          APP_STORE_TEAM_ID: ${{ secrets.APP_STORE_TEAM_ID }}
+          APPLE_KEY_CONTENT: ${{ secrets.APPLE_KEY_CONTENT }}
+          APPLE_KEY_ID: ${{ secrets.APPLE_KEY_ID }}
+          TEMP_KEYCHAIN_PASSWORD: ${{ secrets.TEMP_KEYCHAIN_PASSWORD }}
+          APPLE_ISSUER_ID: ${{ secrets.APPLE_ISSUER_ID }}
           APP_IDENTIFIER: ${{ secrets.APP_IDENTIFIER }}
-          APP_NAME: ${{ secrets.APP_NAME }}
+          TEMP_KEYCHAIN_USER: ${{ secrets.TEMP_KEYCHAIN_USER }}
           FASTLANE_USER: ${{ secrets.FASTLANE_APPLE_ID }}
           MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+          FASTLANE_VERBOSE: true
+
+
         run: |
           cd ios
-          if [ -f "Gemfile" ]; then bundle exec fastlane ios beta; else fastlane ios beta; fi
+          fastlane match appstore --readonly
+          fastlane ios beta --verbose
 
   deploy_android:
     name: Build & Upload Android to Firebase
