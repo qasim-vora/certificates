@@ -31,6 +31,12 @@ jobs:
       - name: Get Packages
         run: flutter pub get
 
+      - name: Install Bundler
+        run: |
+              gem install bundler
+              bundle install --jobs 4 --retry 3
+
+
       - name: Install CocoaPods
         run: |
           sudo gem install cocoapods
