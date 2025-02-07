@@ -13,13 +13,12 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: "3.27.1"
-          channel: 'stable'
-          cache: true
-
+      - name: Set up Flutter
+        run: |
+          # Clone Flutter SDK
+          git clone https://github.com/flutter/flutter.git -b stable
+          echo "$GITHUB_WORKSPACE/flutter/bin" >> $GITHUB_PATH
+          flutter/bin/flutter doctor # Ensure flutter is available in the PATH
 
       - name: Create local.properties
         run: |
@@ -31,9 +30,9 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          flutter clean   
-          flutter pub upgrade  
-          flutter pub run build_runner build --delete-conflicting-outputs
+          flutter/bin/flutter clean   
+          flutter/bin/flutter pub upgrade  
+          flutter/bin/flutter pub run build_runner build --delete-conflicting-outputs
 
       - name: Set up JDK
         uses: actions/setup-java@v1
