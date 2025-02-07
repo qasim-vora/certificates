@@ -2,13 +2,12 @@ name: iOS TestFlight Deployment
 
 on:
   push:
-    branches:
-      - ios  # Change this to your deployment branch
-
+    branches: [ ios ]
 jobs:
   deploy:
     name: Build & Upload to TestFlight
-    runs-on: macos-latest  # Ensure macOS runner for iOS builds
+    runs-on: macos-latest
+    timeout-minutes: 20
 
     steps:
       - name: Checkout Repository
@@ -20,57 +19,62 @@ jobs:
           ruby-version: 3.0
           bundler-cache: true
 
+      - name: Install Bundler
+        run: |
+          gem install bundler
+
+      - name: Install Dependencies via Bundler
+        run: |
+          cd ios
+          bundle install
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-            flutter-version: "3.27.1"
-            channel: 'stable'
-            cache: true
+          flutter-version: "3.27.1"
+          channel: 'stable'
+          cache: true
 
       - name: Get Packages
-        run: flutter pub get
-
+        run: |
+          flutter clean
+          flutter pub get
+          flutter pub run build_runner build --delete-conflicting-outputs
 
       - name: Install CocoaPods
         run: |
           sudo gem install cocoapods
           cd ios
           rm Podfile.lock
-          pod install --repo-update # Ensure pods are correctly installed
+          pod install 
 
-      - name: Install Fastlane
+      - name: Print environment variables
         run: |
-          brew install fastlane  # Install fastlane via Homebrew (this is the recommended method for macOS)
-      - name: Print Environment Variables
-        run: |
-            echo "APP_STORE_KEY_ID: ${{ secrets.APP_STORE_KEY_ID }}"
-            echo "APP_STORE_ISSUER_ID: ${{ secrets.APP_STORE_ISSUER_ID }}"
-            echo "APP_STORE_TEAM_ID: ${{ secrets.APP_STORE_TEAM_ID }}"
-            echo "APP_IDENTIFIER: ${{ secrets.APP_IDENTIFIER }}"
-            echo "APP_NAME: ${{ secrets.APP_NAME }}"
-            echo "FASTLANE_USER: ${{ secrets.FASTLANE_APPLE_ID }}"
-            echo "FASTLANE_AUTH_KEY: ${{ secrets.FASTLANE_AUTH_KEY }}"
-            echo "MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}"
-#      - name: Decrypt and Save App Store Auth Key
-#        env:
-#          FASTLANE_AUTH_KEY: ${{ secrets.FASTLANE_AUTH_KEY }}
-#        run: |
-#          mkdir -p ~/kasim
-#          echo "$FASTLANE_AUTH_KEY" | base64 --decode > ~/fastlane/AuthKey.p8
+          echo "APPLE_KEY_CONTENT=${{ secrets.APPLE_KEY_CONTENT }}"
+          echo "APPLE_KEY_ID=${{ secrets.APPLE_KEY_ID }}"
+          echo "TEMP_KEYCHAIN_PASSWORD=${{ secrets.TEMP_KEYCHAIN_PASSWORD }}"
+          echo "APPLE_ISSUER_ID=${{ secrets.APPLE_ISSUER_ID }}"
+          echo "APP_IDENTIFIER=${{ secrets.APP_IDENTIFIER }}"
+          echo "TEMP_KEYCHAIN_USER=${{ secrets.TEMP_KEYCHAIN_USER }}"
+          echo "FASTLANE_USER=${{ secrets.FASTLANE_APPLE_ID }}"
+          echo "MATCH_PASSWORD=${{ secrets.MATCH_PASSWORD }}"
+          echo "FASTLANE_VERBOSE=${{ secrets.FASTLANE_VERBOSE }}"
 
-#      - name: Unlock Keychain
-#        run: |
-#          security unlock-keychain -p "${{ secrets.MATCH_PASSWORD }}" /Users/runner/Library/Keychains/login.keychain-db
+
       - name: Build & Upload to TestFlight
         env:
-          APP_STORE_KEY_ID: ${{ secrets.APP_STORE_KEY_ID }}
-          APP_STORE_ISSUER_ID: ${{ secrets.APP_STORE_ISSUER_ID }}
-          APP_STORE_TEAM_ID: ${{ secrets.APP_STORE_TEAM_ID }}
+          APPLE_KEY_CONTENT: ${{ secrets.APPLE_KEY_CONTENT }}
+          APPLE_KEY_ID: ${{ secrets.APPLE_KEY_ID }}
+          TEMP_KEYCHAIN_PASSWORD: ${{ secrets.TEMP_KEYCHAIN_PASSWORD }}
+          APPLE_ISSUER_ID: ${{ secrets.APPLE_ISSUER_ID }}
           APP_IDENTIFIER: ${{ secrets.APP_IDENTIFIER }}
-          APP_NAME: ${{ secrets.APP_NAME }}
+          TEMP_KEYCHAIN_USER: ${{ secrets.TEMP_KEYCHAIN_USER }}
           FASTLANE_USER: ${{ secrets.FASTLANE_APPLE_ID }}
           MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+          FASTLANE_VERBOSE: true
+
+
         run: |
           cd ios
-          bundle exec fastlane ios beta
+          fastlane match appstore --readonly
+          fastlane ios beta --verbose
