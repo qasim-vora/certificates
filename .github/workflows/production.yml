@@ -22,13 +22,14 @@ jobs:
 
       - name: Install Bundler & Dependencies
         run: |
-                gem install bundler
-                if [ -f "Gemfile" ]; then
-                  rm -rf ios/Gemfile.lock
-                  bundle install --jobs 4 --retry 3
-                else
-                  echo "No Gemfile found, skipping bundle install."
-                fi
+            if [ -f "ios/Gemfile" ]; then
+              cd ios
+              gem install bundler
+              rm -f Gemfile.lock  # Remove any corrupt Gemfile.lock
+              bundle install --jobs 4 --retry 3
+            else
+              echo "No Gemfile found in ios directory, skipping bundle install."
+            fi
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
